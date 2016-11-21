@@ -3,7 +3,6 @@
 __version__ = "0.6"
 
 # Don't need to import anything
-
 LOGOS = {'Arch Linux': '''{c1}
 {c1}               +                {results[0]}
 {c1}               #                {results[1]}
@@ -26,4 +25,6 @@ LOGOS = {'Arch Linux': '''{c1}
 \x1b[0m'''
 }
 
-print(LOGOS['Arch Linux'])
+
+def ReturnLogo(logo = 'Arch Linux'):
+    return LOGOS[logo]

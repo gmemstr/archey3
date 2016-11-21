@@ -13,5 +13,5 @@ setup(
     license="GPL",
     url="http://bluepeppers.github.com/archey3",
     long_description=read("README.md"),
-    scripts=["archey3"]
+    scripts=["src/archey3"]
 )
