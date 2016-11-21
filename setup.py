@@ -6,10 +6,10 @@ def read(fname):
 
 setup(
     name="Archey3",
-    version="0.4",
-    author="Laurie Clark-Michalek",
-    author_email="bluepeppers@archlinux.us",
-    description="A simple python scrip to display an Archlinux logo in ASCII art along with basic system information.",
+    version="0.6",
+    author="Gabriel Simmer",
+    author_email="bladesimmer@gmail.com",
+    description="Archey3 fork with lockscreen & more supported distros.",
     license="GPL",
     url="http://bluepeppers.github.com/archey3",
     long_description=read("README.md"),

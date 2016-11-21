@@ -10,11 +10,15 @@
 # Simple python script to display an Archlinux logo in ASCII art
 # Along with basic system information.
 
-__version__ = "0.5"
+__version__ = "0.6"
 
 # Import libraries
 import collections
-import subprocess, optparse, re, sys, configparser
+import subprocess
+import optparse
+import re
+import sys
+import configparser
 from subprocess import Popen, PIPE
 from optparse import OptionParser
 from getpass import getuser
@@ -29,6 +33,7 @@ try:
     from logbook import Logger, lookup_level
 except ImportError:
     class Logger(object):
+
         def __init__(self, name, level=0):
             self.name = name
             self.level = level
@@ -69,9 +74,10 @@ LOGOS = {'Arch Linux': '''{c1}
 {c2}  ##'                     '##   {results[16]}
 {c2} #'                         `#  {results[17]}
 \x1b[0m'''
-}
+         }
 
 CLASS_MAPPINGS = {}
+
 
 def module_register(name):
     """
@@ -83,49 +89,49 @@ def module_register(name):
     return decorator
 
 DE_DICT = collections.OrderedDict([
-        ('cinnamon', 'Cinnamon'),
-        ('gnome-session', 'GNOME'),
-        ('gnome-shell', 'GNOME'),
-        ('ksmserver', 'KDE'),
-        ('mate-session', 'MATE'),
-        ('xfce4-session', 'Xfce'),
-        ('lxsession', 'LXDE'),
-        ('', 'None'),
-        ])
+    ('cinnamon', 'Cinnamon'),
+    ('gnome-session', 'GNOME'),
+    ('gnome-shell', 'GNOME'),
+    ('ksmserver', 'KDE'),
+    ('mate-session', 'MATE'),
+    ('xfce4-session', 'Xfce'),
+    ('lxsession', 'LXDE'),
+    ('', 'None'),
+])
 
 WM_DICT = collections.OrderedDict([
-        ('awesome', 'Awesome'),
-        ('beryl', 'Beryl'),
-        ('blackbox', 'Blackbox'),
-        ('bspwm', 'bspwm'),
-        ('dwm', 'DWM'),
-        ('enlightenment', 'Enlightenment'),
-        ('fluxbox', 'Fluxbox'),
-        ('fvwm', 'FVWM'),
-        ('herbstluftwm', 'herbstluftwm'),
-        ('i3', 'i3'),
-        ('sway', 'sway'),
-        ('icewm', 'IceWM'),
-        (re.compile('kwin(_x11|_wayland)?'), 'KWin'),
-        ('metacity', 'Metacity'),
-        ('musca', 'Musca'),
-        ('openbox', 'Openbox'),
-        ('pekwm', 'PekWM'),
-        ('ratpoison', 'ratpoison'),
-        ('scrotwm', 'ScrotWM'),
-        ('subtle', 'subtle'),
-        ('monsterwm', 'MonsterWM'),
-        ('wmaker', 'Window Maker'),
-        ('wmfs', 'Wmfs'),
-        ('wmii', 'wmii'),
-        ('xfwm4', 'Xfwm'),
-        ('emerald', 'Emerald'),
-        ('compiz', 'Compiz'),
-        (re.compile('xmonad-*'), 'xmonad'),
-        ('qtile', 'QTile'),
-        ('wingo', 'Wingo'),
-        ('', 'None'),
-        ])
+    ('awesome', 'Awesome'),
+    ('beryl', 'Beryl'),
+    ('blackbox', 'Blackbox'),
+    ('bspwm', 'bspwm'),
+    ('dwm', 'DWM'),
+    ('enlightenment', 'Enlightenment'),
+    ('fluxbox', 'Fluxbox'),
+    ('fvwm', 'FVWM'),
+    ('herbstluftwm', 'herbstluftwm'),
+    ('i3', 'i3'),
+    ('sway', 'sway'),
+    ('icewm', 'IceWM'),
+    (re.compile('kwin(_x11|_wayland)?'), 'KWin'),
+    ('metacity', 'Metacity'),
+    ('musca', 'Musca'),
+    ('openbox', 'Openbox'),
+    ('pekwm', 'PekWM'),
+    ('ratpoison', 'ratpoison'),
+    ('scrotwm', 'ScrotWM'),
+    ('subtle', 'subtle'),
+    ('monsterwm', 'MonsterWM'),
+    ('wmaker', 'Window Maker'),
+    ('wmfs', 'Wmfs'),
+    ('wmii', 'wmii'),
+    ('xfwm4', 'Xfwm'),
+    ('emerald', 'Emerald'),
+    ('compiz', 'Compiz'),
+    (re.compile('xmonad-*'), 'xmonad'),
+    ('qtile', 'QTile'),
+    ('wingo', 'Wingo'),
+    ('', 'None'),
+])
 
 COLORS = {
     'black': '0',
@@ -138,13 +144,16 @@ COLORS = {
     'white': '7'
 }
 
+
 class ArgumentError(Exception):
+
     def __init__(self, caller, message):
         msg = "{0}: {1}".format(caller.__class__.__name__, message)
         super().__init__(msg)
 
 # State must be serializable
 State = collections.namedtuple("State", "color config logger")
+
 
 class display(object):
     command_line = ''
@@ -179,13 +188,14 @@ class display(object):
 
             try:
                 self.process = Popen(cmd.split(), stdin=PIPE, stdout=PIPE,
-                                      stderr=PIPE)
+                                     stderr=PIPE)
             except Exception as e:
-                self.state.logger.error("Could not run command {0}".format(cmd))
+                self.state.logger.error(
+                    "Could not run command {0}".format(cmd))
 
     def render(self):
         (stdoutdata, stderrdata) = self.process.communicate(self.stdindata
-                                                             or None)
+                                                            or None)
 
         return self.format_output(stdoutdata.decode())
 
@@ -197,7 +207,7 @@ class display(object):
             return output
 
         if number <= low:
-            color_= low_color
+            color_ = low_color
         elif low < number <= medium:
             color_ = medium_color
         elif medium < number:
@@ -207,6 +217,7 @@ class display(object):
                                   color(self.state, 'clear'))
 
     regex_class = re.compile("").__class__
+
     def process_exists(self, key):
         global PROCESSES
         if isinstance(key, self.regex_class):
@@ -222,17 +233,17 @@ class fsDisplay(display):
 
     conversions = {
         'binary': {
-               'K': 2 ** 10,
-               'M': 2 ** 20,
-               'G': 2 ** 30,
-               'T': 2 ** 40,
-               },
+            'K': 2 ** 10,
+            'M': 2 ** 20,
+            'G': 2 ** 30,
+            'T': 2 ** 40,
+        },
         'si': {
             'K': 10 ** 3,
             'M': 10 ** 6,
             'G': 10 ** 9,
             'T': 10 ** 12,
-            },
+        },
     }
 
     def __init__(self, **kwargs):
@@ -248,13 +259,14 @@ class fsDisplay(display):
                 'locale -ck decimal_point').split('\n')[1].split('=')[1].strip('\"')
         except Exception as e:
             self.state.logger.warning('Could not determine locale decimal point,' +
-                   'defaulting to \'.\', failed with error {0}'.format(e))
+                                      'defaulting to \'.\', failed with error {0}'.format(e))
             decimal_point = '.'
         values = [line for line in instring.split('\n') if line][1].split()
         used = values[3].replace(decimal_point, '.')
         total = values[2].replace(decimal_point, '.')
         fstype = values[1]
-        conversion_type = self.state.config.get('fs', 'unit', fallback="si").lower()
+        conversion_type = self.state.config.get(
+            'fs', 'unit', fallback="si").lower()
         conversions = self.conversions[conversion_type]
 
         mount = '/root' if self.arg1 == '/' else self.arg1
@@ -264,7 +276,7 @@ class fsDisplay(display):
         medium = self.state.config.getint('fs', 'medium_bound', fallback=70)
 
         try:
-            #convert to straight float
+            # convert to straight float
             used_ = float(used[:-1]) * conversions[used[-1].upper()]
             total_ = float(total[:-1]) * conversions[total[-1].upper()]
             persentage = used_ / total_ * 100
@@ -284,12 +296,13 @@ class fsDisplay(display):
                 used=used, total=total, fstype=fstype)
         return title, part
 
+
 @module_register("ram")
 class ramDisplay(display):
     command_line = "free -m"
 
     def format_output(self, instring):
-        ram = ''.join(line for line in str(instring).split('\n') if\
+        ram = ''.join(line for line in str(instring).split('\n') if
                       line.startswith('Mem:')).split()
         used = int(ram[2])
         total = int(ram[1])
@@ -303,6 +316,7 @@ class ramDisplay(display):
         part = '{used} / {total} MB'.format(used=used, total=total)
         return title, part
 
+
 @module_register("sensor")
 class sensorDisplay(display):
     command_line = "sensors {arg1}"
@@ -311,12 +325,12 @@ class sensorDisplay(display):
         super().__init__(**kwargs)
 
         arg_from_conf = self.state.config.get('sensor', 'sensor',
-                                        fallback='coretemp-*')
+                                              fallback='coretemp-*')
         try:
             arg_from_arg = kwargs["args"][0]
         except IndexError:
             self.state.logger.error(
-               "Did not get any arguments, require one, the sensor to display.")
+                "Did not get any arguments, require one, the sensor to display.")
             raise
 
         if arg_from_arg:
@@ -329,7 +343,7 @@ class sensorDisplay(display):
 
         out = []
         for line in tempinfo:
-            info = [re.sub("\s\s+", "", line) for line in line.split('  ') if\
+            info = [re.sub("\s\s+", "", line) for line in line.split('  ') if
                     line]
             value = info[1]
             intvalue = int(value[:3])
@@ -345,14 +359,16 @@ class sensorDisplay(display):
             out.append((info[0], temp))
         return out
 
+
 @module_register("env")
 class envDisplay(display):
+
     def __init__(self, **kwargs):
         try:
             self.arg1 = kwargs["args"][0]
         except IndexError:
             self.state.logger.error("Did not get any arguments, require one," +
-                              " the env variable to display.")
+                                    " the env variable to display.")
             raise
 
         super().__init__(**kwargs)
@@ -360,6 +376,7 @@ class envDisplay(display):
     def render(self):
         argvalue = getenv(self.arg1.upper())
         return ('$' + self.arg1.upper(), argvalue)
+
 
 @module_register("uname")
 class unameDisplay(display):
@@ -372,7 +389,7 @@ class unameDisplay(display):
             flag = kwargs["args"][0]
         except IndexError:
             self.state.logger.error("Did not get any arguments, require one," +
-                              " the flag to pass to uname")
+                                    " the flag to pass to uname")
             raise
 
         arg_from_conf = self.state.config.get('uname', 'argument', fallback="")
@@ -387,6 +404,7 @@ class unameDisplay(display):
     def format_output(self, instring):
         return (UNAME_FLAG_MEANINGS[self.arg1[1]], instring)
 
+
 @module_register("cpu")
 class cpuDisplay(display):
     command_line = "cat /proc/cpuinfo"
@@ -398,8 +416,10 @@ class cpuDisplay(display):
             infodict[k.strip()] = v.strip()
         return "Processor Type", infodict["model name"]
 
+
 @module_register("uptime")
 class uptimeDisplay(display):
+
     def render(self):
         with open("/proc/uptime") as upfile:
             raw = upfile.read()
@@ -412,10 +432,11 @@ class uptimeDisplay(display):
             minute = int(fuptime / 60)
             uptime = '{daystring}{hours}:{mins:02d}'.format(
                 daystring='{days} day{s}, '.format(days=day, s=('s' if day > 1
-                                                     else '')) if day else '',
-                hours = hour, mins = minute
+                                                                else '')) if day else '',
+                hours=hour, mins=minute
             )
             return "Uptime", uptime
+
 
 @module_register("packages")
 class packageDisplay(display):
@@ -424,8 +445,10 @@ class packageDisplay(display):
     def format_output(self, instring):
         return "Packages", len(instring.rstrip('\n').split('\n'))
 
+
 @module_register("distro")
 class distroCheck(display):
+
     def render(self):
         try:
             _ = open("/etc/pacman.conf")
@@ -435,6 +458,7 @@ class distroCheck(display):
             distro = "Arch Linux"
         distro = '{0} {1}'.format(distro, self.call_command("uname -m"))
         return "OS", distro
+
 
 @module_register("process")
 class processCheck(display):
@@ -459,8 +483,10 @@ class processCheck(display):
             return True
         return False
 
+
 @module_register("wm")
 class wmDisplay(display):
+
     def render(self):
         if self.state.config.get('wm', 'manual', fallback=False):
             return "WM", self.state.config.get('wm', 'manual')
@@ -471,8 +497,10 @@ class wmDisplay(display):
                 break
         return "WM", WM_DICT[wm]
 
+
 @module_register("de")
 class deDisplay(display):
+
     def render(self):
         if self.state.config.get('de', 'manual', fallback=False):
             return "DE", self.state.config.get('de', 'manual')
@@ -482,6 +510,7 @@ class deDisplay(display):
                 de = key
                 break
         return "DE", DE_DICT[de]
+
 
 @module_register("mpd")
 class mpdDisplay(display):
@@ -498,7 +527,7 @@ class mpdDisplay(display):
             self.stat = kwargs["args"][0]
         except IndexError:
             self.state.logger.error("Did not get any arguments, require one," +
-                              " the stat to display.")
+                                    " the stat to display.")
         self.arg1 = self.state.config.get('mpd', 'host', fallback='localhost')
         self.arg2 = self.state.config.getint('mpd', 'port', fallback=6600)
 
@@ -509,14 +538,15 @@ class mpdDisplay(display):
             stats['artists'] = lines[0].split(':')[1].strip()
             stats['albums'] = lines[1].split(':')[1].strip()
             stats['songs'] = lines[2].split(':')[1].strip()
-        #if people don't have mpc installed then return None)
+        # if people don't have mpc installed then return None)
         except:
             self.state.logger.error(
                 "Could not parse mpc output, is mpc installed?")
             return
 
         return ('{statname} in MPD database'.format(statname=self.stat.title()),
-               stats[self.stat])
+                stats[self.stat])
+
 
 @module_register("system_upgrade")
 class systemUpgrade(display):
@@ -531,7 +561,7 @@ class systemUpgrade(display):
                     datestart = line.find('[')
                     dateend = line.find(']')
                     if datestart != -1 and dateend != -1:
-                        datestr = line[datestart + 1 : dateend]
+                        datestr = line[datestart + 1: dateend]
                     break
         except Exception as err:
             print(err)
@@ -548,13 +578,14 @@ class systemUpgrade(display):
 
 #------------ Config    -----------
 
+
 class ArcheyConfigParser(configparser.SafeConfigParser):
     """
     A parser for the archey config file.
     """
 
     defaults = {'core': {'align': 'top',
-                         'color': 'blue',
+                         'color': 'white',
                          'display_modules':
                          """\
 distro(), uname(n), uname(r), uptime(), wm(), de(), packages(), ram(),\
@@ -573,7 +604,8 @@ distro(), uname(n), uname(r), uptime(), wm(), de(), packages(), ram(),\
         if file_location is None and "XDG_CONFIG_HOME" not in os.environ:
             config_location = os.path.expanduser("~/.archey3.cfg")
         elif file_location is None:
-            config_location = os.path.expandvars("$XDG_CONFIG_HOME/archey3.cfg")
+            config_location = os.path.expandvars(
+                "$XDG_CONFIG_HOME/archey3.cfg")
         else:
             config_location = \
                 os.path.expandvars(os.path.expanduser(file_location))
@@ -585,7 +617,7 @@ distro(), uname(n), uname(r), uptime(), wm(), de(), packages(), ram(),\
             self.write_config(config_location)
             return [config_location]
         if not loaded:
-            #Try with default
+            # Try with default
             loaded = super(ArcheyConfigParser, self).read()
         return loaded
 
@@ -598,7 +630,7 @@ distro(), uname(n), uname(r), uptime(), wm(), de(), packages(), ram(),\
                 self.add_section(section)
 
             for option, value in values.items():
-                #strip any excess spaces
+                # strip any excess spaces
                 value = re.sub("( +)", " ", value)
                 self.set(section, option, value)
 
@@ -618,27 +650,28 @@ def screenshot(state):
     for x in sorted(range(1, screenshot_time + 1), reverse=True):
         print('%s' % x, end='')
         sys.stdout.flush()
-        sleep(1.0/3)
+        sleep(1.0 / 3)
         for x in range(3):
             print('.', end='')
             sys.stdout.flush()
-            sleep(1.0/3)
+            sleep(1.0 / 3)
 
     print('Say Cheese!')
     sys.stdout.flush()
 
     screenshot_command = state.config.get('core', 'screenshot_command',
-                                  fallback="import -window root <datetime>.jpg")
+                                          fallback="import -window root <datetime>.jpg")
     try:
         subprocess.check_call(
             screenshot_command.replace('<datetime>',
-                                       ctime().replace(' ','_')).split(" "))
+                                       ctime().replace(' ', '_')).split(" "))
     except subprocess.CalledProcessError as e:
         state.logger.critical('Screenshot failed with return code {0}.'.format(
-                e.returncode))
+            e.returncode))
         raise
     except subprocess.FileNotFoundError:
         print("Could not find import command, install imagemagick")
+
 
 def color(state, code, bold=False):
     """
@@ -657,6 +690,7 @@ def color(state, code, bold=False):
 
     return first_bitty_bit + second_bitty_bit
 
+
 def _mp_render_helper(container):
     """
     A little helper to get round the one iterator argument with
@@ -667,6 +701,7 @@ def _mp_render_helper(container):
     args = container["args"]
     cls = CLASS_MAPPINGS[cls_name]
     return render_class(state, cls, args)
+
 
 def render_class(state, cls, args):
     """
@@ -692,6 +727,7 @@ def render_class(state, cls, args):
                 cls.__name__, e))
 
 #------------ Display object ---------
+
 
 class Archey(object):
     DISPLAY_PARSING_REGEX = "(?P<func>\w+)\((|(?P<args>[\w, /]+))\)"
@@ -736,7 +772,7 @@ class Archey(object):
 
         return LOGOS[self.distro_name].format(c1=color(self.state, 1),
                                               c2=color(self.state, 2),
-                                              results = results
+                                              results=results
                                               )
 
     def prepare_results(self):
@@ -752,14 +788,13 @@ class Archey(object):
         arguments = []
         for cls_name, args in self.parse_display():
             arguments.append({
-                    'cls_name': cls_name,
-                    'args': args,
-                    'state': self.state
-                    })
+                'cls_name': cls_name,
+                'args': args,
+                'state': self.state
+            })
         raw_out = pool.map(_mp_render_helper, arguments)
         outputs = list(map(self.format_item,
                            filter(bool, raw_out)))
-
 
         return outputs + [""] * (18 - len(outputs))
 
@@ -808,7 +843,7 @@ class Archey(object):
         title = item[0].rstrip(':')
         data = str(item[1]).rstrip()
 
-        #if we're dealing with a fraction
+        # if we're dealing with a fraction
         if len(data.split('/')) == 2:
             numerator = data.split('/')[0]
             numerator = (color(self.state, 1, bold=True) + numerator +
@@ -817,11 +852,12 @@ class Archey(object):
             data = '/'.join((numerator, denominator))
 
         return "{color}{title}:{clear} {data}".format(
-                color=color(self.state, 1),
-                title=title,
-                data=data,
-                clear=color(self.state, "clear")
+            color=color(self.state, 1),
+            title=title,
+            data=data,
+            clear=color(self.state, "clear")
         )
+
 
 def main():
     parser = OptionParser(
@@ -830,32 +866,32 @@ def main():
  screenshots""",
         version="%prog {version}".format(version=__version__))
     parser.add_option('-c', '--color',
-            action='store', type='choice', dest='color',
-            choices=('black',
-                     'red',
-                     'green',
-                     'yellow',
-                     'blue',
-                     'magenta',
-                     'cyan',
-                     'white'),
-            help="""choose a color: black, red, green, yellow, blue, magenta,\
+                      action='store', type='choice', dest='color',
+                      choices=('black',
+                               'red',
+                               'green',
+                               'yellow',
+                               'blue',
+                               'magenta',
+                               'cyan',
+                               'white'),
+                      help="""choose a color: black, red, green, yellow, blue, magenta,\
             cyan, white [Default: blue]""")
     parser.add_option('-s', '--screenshot',
-            action='store_true', dest='screenshot', help='Take a screenshot')
+                      action='store_true', dest='screenshot', help='Take a screenshot')
     parser.add_option('--config',
-            action='store', dest='config', default=None,
-            help="Set the location of the config file to load.")
+                      action='store', dest='config', default=None,
+                      help="Set the location of the config file to load.")
     parser.add_option('--debug',
-            action='store', type='choice', dest='log_level',
-            choices=('NOTSET',
-                     'DEBUG',
-                     'INFO',
-                     'WARNING',
-                     'ERROR',
-                     'CRITICAL'),
-            default='CRITICAL',
-            help="The level of errors you wish to display. Choices are\
+                      action='store', type='choice', dest='log_level',
+                      choices=('NOTSET',
+                               'DEBUG',
+                               'INFO',
+                               'WARNING',
+                               'ERROR',
+                               'CRITICAL'),
+                      default='CRITICAL',
+                      help="The level of errors you wish to display. Choices are\
  NOTSET, DEBUG, INFO, WARNING, ERROR, and CRITICAL. CRITICAL is the default.")
     (options, args) = parser.parse_args()
 
